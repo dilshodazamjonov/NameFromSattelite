@@ -1,0 +1,41 @@
+name: namefromsatellite
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/name_from_satellite
+      STORAGE_BACKEND: local
+      STORAGE_ROOT: /app/data/uploads
+      STATIC_URL_PREFIX: /static
+      PUBLIC_BASE_URL: ""
+      MAX_UPLOAD_BYTES: "5242880"
+      REVERSE_GEOCODER_ENABLED: "false"
+      PORT: "8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_data:/app/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: name_from_satellite
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d name_from_satellite"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  postgres_data:
+  uploads_data:

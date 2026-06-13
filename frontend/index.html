@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Name From Satellite</title>
+    <link rel="stylesheet" href="/frontend/styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section id="lettersPage" class="page-card">
+        <header class="heading">
+          <h1>Name From Satellite</h1>
+          <p>Type a word and generate it using real satellite/aerial letter images.</p>
+        </header>
+
+        <div class="word-row">
+          <label>
+            <span>Word</span>
+            <input id="wordInput" type="text" maxlength="7" inputmode="latin" placeholder="AZIZ" />
+          </label>
+          <button id="generateButton" class="primary-button" type="button">Generate</button>
+        </div>
+
+        <div id="missingWarning" class="warning hidden"></div>
+        <div id="wordOutput" class="word-output"></div>
+
+        <a class="secondary-link" href="/upload">Add letter image</a>
+      </section>
+
+      <section id="uploadPage" class="page-card hidden">
+        <header class="heading">
+          <h1>Add Letter Image</h1>
+          <p>
+            Upload or paste a clean cropped satellite/aerial image. Do not include map labels,
+            pins, icons, UI controls, or watermarks.
+          </p>
+        </header>
+
+        <div id="dropZone" class="drop-zone" tabindex="0">
+          <input id="fileInput" type="file" accept="image/*" />
+          <span class="drop-title">Drop image here</span>
+          <span class="drop-copy">Click to browse, drag and drop, or paste with Ctrl+V</span>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            <span>Letter</span>
+            <select id="letterInput" aria-label="Letter"></select>
+          </label>
+          <label>
+            <span>Place</span>
+            <select id="placeSelect" aria-label="Place">
+              <option value="">No place selected</option>
+            </select>
+          </label>
+          <label>
+            <span>Note</span>
+            <input id="noteInput" type="text" maxlength="180" placeholder="Optional shape or source note" />
+          </label>
+        </div>
+
+        <label class="wide-field">
+          <span>Location / coordinates</span>
+          <input
+            id="locationInput"
+            type="text"
+            maxlength="160"
+            placeholder="Optional: 41°18'57.43&quot;N 69°16'28.81&quot;E"
+          />
+        </label>
+
+        <div id="previewPanel" class="preview-panel hidden">
+          <figure>
+            <img id="uploadPreview" alt="Selected satellite crop preview" />
+            <figcaption>Image to save</figcaption>
+          </figure>
+        </div>
+
+        <button id="saveButton" class="primary-button" type="button" disabled>Save Letter Image</button>
+
+        <div id="savedPanel" class="saved-panel hidden">
+          <figure>
+            <img id="savedPreview" alt="Saved letter image" />
+            <figcaption id="savedCaption">Saved image</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <div id="status" class="status" role="status"></div>
+    </main>
+
+    <script src="/frontend/app.js?v=20260609-1"></script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+[project]
+name = "namefromsattelite"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "numpy",
+    "opencv-python",
+    "pillow",
+    "pydantic",
+    "python-multipart",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "alembic",
+    "python-dotenv",
+    "uvicorn",
+]
