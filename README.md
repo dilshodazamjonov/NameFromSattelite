@@ -1,5 +1,5 @@
 ---
-title: NameFromSattelite
+title: NameFromSatellite
 emoji: 🛰️
 colorFrom: blue
 colorTo: indigo
@@ -23,6 +23,7 @@ The manual label is the source of truth. The current MVP does not try to classif
 - local image storage for development or Supabase Storage for free cloud deployment
 - Postgres metadata storage
 - word generation up to 7 letters
+- clickable Google Maps links for generated images that have saved coordinates
 - accepted upload formats: `jpg`, `jpeg`, `png`, `webp`
 - default max upload size: 5 MB
 
@@ -66,6 +67,8 @@ Build and start the backend plus Postgres:
 docker compose up --build
 ```
 
+By default, Compose exposes the app at `127.0.0.1:18010` to avoid Windows machines where common ports such as `8000` or `8010` are reserved or blocked. To use another host port, set `HOST_PORT` before starting Compose.
+
 In another terminal, confirm the backend can connect to Postgres:
 
 ```powershell
@@ -81,13 +84,13 @@ docker compose exec backend python scripts/init_db.py
 Open the app:
 
 ```text
-http://localhost:8000/
+http://localhost:18010/
 ```
 
 Health check:
 
 ```text
-http://localhost:8000/health
+http://localhost:18010/health
 ```
 
 Stop containers without deleting data:
@@ -123,6 +126,7 @@ Uploaded images survive container restarts because `uploads_data` is mounted at 
 
 ```text
 DATABASE_URL=postgresql://postgres:postgres@postgres:5432/name_from_satellite
+HOST_PORT=18010
 STORAGE_BACKEND=local
 STORAGE_ROOT=/app/data/uploads
 STATIC_URL_PREFIX=/static
@@ -133,17 +137,17 @@ REVERSE_GEOCODER_ENABLED=false
 
 The Postgres password in `docker-compose.yml` is for local Docker deployment only. Change it before exposing the database outside your machine.
 
-## Free Cloud Deployment: Koyeb + Supabase
+## Free Cloud Deployment: Hugging Face Spaces + Supabase
 
 Free deployment architecture:
 
 ```text
-Koyeb Free          -> Dockerized FastAPI backend
-Supabase Free      -> Postgres metadata database
-Supabase Storage   -> uploaded satellite-letter images
+Hugging Face Spaces -> Dockerized FastAPI backend
+Supabase Free       -> Postgres metadata database
+Supabase Storage    -> uploaded satellite-letter images
 ```
 
-For cloud deployment, use `STORAGE_BACKEND=supabase`. Do not store uploads only inside the Koyeb container filesystem; it is not persistent enough for user uploads.
+For cloud deployment, use `STORAGE_BACKEND=supabase`. Do not store uploads only inside the Hugging Face container filesystem; Space containers can restart/rebuild, so user uploads must live in Supabase Storage.
 
 Setup:
 
@@ -153,16 +157,18 @@ Setup:
 4. Copy the Supabase Postgres connection string into `DATABASE_URL`.
 5. Copy `SUPABASE_URL`.
 6. Copy `SUPABASE_SERVICE_ROLE_KEY`.
-7. Deploy the backend to Koyeb from the GitHub repo using the Dockerfile.
-8. Set the Koyeb environment variables listed below.
-9. Run `python scripts/check_db.py` in the Koyeb service shell.
-10. Run `python scripts/init_db.py` in the Koyeb service shell.
-11. Open deployed `/health`.
-12. Upload an image.
-13. Generate a word.
-14. Redeploy or restart the backend and confirm the uploaded image still loads.
+7. Push the repo to the Hugging Face Space repository.
+8. Keep this README front matter set to `sdk: docker` and `app_port: 7860`.
+9. Set the Hugging Face Space secrets/environment variables listed below.
+10. Run `python scripts/check_db.py` in the Space terminal or Docker shell.
+11. Run `python scripts/init_db.py` in the Space terminal or Docker shell.
+12. Open deployed `/health`.
+13. Upload an image.
+14. Generate a word.
+15. Click `Open map` on a generated tile that has coordinates.
+16. Rebuild/restart the Space and confirm the uploaded image still loads.
 
-Koyeb environment variables:
+Hugging Face Space environment variables/secrets:
 
 ```text
 DATABASE_URL=
@@ -175,10 +181,37 @@ MAX_UPLOAD_BYTES=5242880
 REVERSE_GEOCODER_ENABLED=false
 ```
 
-The Dockerfile listens on Koyeb's `PORT` environment variable:
+The Dockerfile defaults to Hugging Face's configured app port:
 
 ```text
-python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers
+python -m uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-7860} --proxy-headers
+```
+
+Push an update to an existing Hugging Face Space repo:
+
+```powershell
+git remote add hf https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
+git push hf main
+```
+
+If the `hf` remote already exists:
+
+```powershell
+git push hf main
+```
+
+After the Space rebuilds, open:
+
+```text
+https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
+```
+
+Then check:
+
+```text
+/health
+/letters
+/upload
 ```
 
 ## Local Development Without Docker
@@ -266,6 +299,12 @@ POST /generate
 
 See [docs/api_plan.md](docs/api_plan.md).
 
+`POST /api/words/generate` returns optional `latitude` and `longitude` for generated images that have linked place coordinates. The frontend makes those generated images clickable and also shows an `Open map` link:
+
+```text
+https://www.google.com/maps?q={latitude},{longitude}
+```
+
 ## Storage
 
 Saved image example:
@@ -289,7 +328,7 @@ storage_key = letters/O/upload_abc123.png
 public_url = https://your-project.supabase.co/storage/v1/object/public/letter-images/letters/O/upload_abc123.png
 ```
 
-The database stores deployable relative storage keys and public URLs, not absolute local filesystem paths. In local Docker, `/app/data/uploads` is backed by the `uploads_data` volume. In Koyeb/Supabase mode, uploaded bytes go to Supabase Storage.
+The database stores deployable relative storage keys and public URLs, not absolute local filesystem paths. In local Docker, `/app/data/uploads` is backed by the `uploads_data` volume. In Hugging Face/Supabase mode, uploaded bytes go to Supabase Storage.
 
 See [docs/storage.md](docs/storage.md).
 
@@ -322,6 +361,7 @@ If the upload form receives coordinate text like `41 deg 18'59.32"N 69 deg 17'56
 - Generate a short word such as `AZ`.
 - Generate a 7-letter word.
 - Generate a word containing a letter with no saved images and confirm the missing-letter response is clear.
+- Generate a word using an image with coordinates and confirm `Open map` opens Google Maps.
 - Restart containers with `docker compose restart`.
 - Confirm the previously uploaded image still loads from `/static/...`.
 
@@ -335,6 +375,7 @@ If the upload form receives coordinate text like `41 deg 18'59.32"N 69 deg 17'56
 - Confirm the file appears in the Supabase Storage bucket.
 - Confirm the database row stores a relative `storage_key` and usable `public_url`.
 - Generate a word and confirm image URLs load.
+- Click `Open map` on a generated image with coordinates and confirm Google Maps opens.
 - Restart or redeploy the backend and confirm images still work.
 
 ## Legacy Code

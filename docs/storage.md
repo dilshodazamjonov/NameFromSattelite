@@ -67,7 +67,7 @@ FastAPI mounts `STORAGE_ROOT` at `STATIC_URL_PREFIX` when the local backend is a
 
 ## Supabase Storage
 
-For Koyeb or another container host, use:
+For Hugging Face Spaces or another container host, use:
 
 ```text
 STORAGE_BACKEND=supabase

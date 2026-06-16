@@ -313,7 +313,7 @@ def list_letter_images(
 
 def generate_word_from_letter_images(db: Session, word: str) -> dict[str, Any]:
     normalized = normalize_word(word)
-    selected_letters: list[dict[str, str | None]] = []
+    selected_letters: list[dict[str, Any]] = []
     missing_letters: list[str] = []
 
     for letter in split_letters(normalized):
@@ -329,6 +329,8 @@ def generate_word_from_letter_images(db: Session, word: str) -> dict[str, Any]:
                 "public_url": image.public_url,
                 "place_id": image.place_id,
                 "location": place_location(image.place),
+                "latitude": place_latitude(image.place),
+                "longitude": place_longitude(image.place),
             }
         )
 
@@ -423,3 +425,19 @@ def place_location(place: Place | None) -> str | None:
     if place.latitude is not None and place.longitude is not None:
         return f"{place.latitude}, {place.longitude}"
     return place.name
+
+
+def place_latitude(place: Place | None) -> float | None:
+    if place is None or place.latitude is None:
+        return None
+    if -90 <= place.latitude <= 90:
+        return float(place.latitude)
+    return None
+
+
+def place_longitude(place: Place | None) -> float | None:
+    if place is None or place.longitude is None:
+        return None
+    if -180 <= place.longitude <= 180:
+        return float(place.longitude)
+    return None

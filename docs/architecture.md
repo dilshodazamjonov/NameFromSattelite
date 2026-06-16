@@ -100,6 +100,8 @@ A generated word is dynamic and is not stored yet.
 
 The backend receives a word, normalizes it to uppercase A-Z, and randomly selects one saved `letter_image` per character. If any character has no images, the response is incomplete and lists `missing_letters`.
 
+When a selected image has linked place coordinates, the generated word response includes `latitude` and `longitude`. The frontend uses those numbers to show an `Open map` link to Google Maps.
+
 ## Backend Flows
 
 ### Add Letter Image
@@ -144,7 +146,7 @@ POST /api/words/generate
 -> enforce A-Z and max length 7
 -> split into letters
 -> randomly select one Postgres letter_images row per letter
--> return public_url for each selected image
+-> return public_url and optional coordinates for each selected image
 ```
 
 Compatibility aliases:
@@ -182,12 +184,12 @@ uploads_data      -> persistent upload volume mounted at /app/data/uploads
 The free cloud deployment target uses:
 
 ```text
-Koyeb Free         -> Dockerized FastAPI backend
-Supabase Free     -> Postgres database
-Supabase Storage  -> uploaded image files
+Hugging Face Spaces -> Dockerized FastAPI backend
+Supabase Free       -> Postgres database
+Supabase Storage    -> uploaded image files
 ```
 
-In Supabase mode, the database still stores relative `storage_key` values and public URLs. Uploaded images are not stored only inside the Koyeb container filesystem.
+In Supabase mode, the database still stores relative `storage_key` values and public URLs. Uploaded images are not stored only inside the Hugging Face container filesystem.
 
 There is no nginx, Kubernetes, worker queue, ML service, or auth layer in this MVP.
 

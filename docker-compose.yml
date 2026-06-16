@@ -15,7 +15,7 @@ services:
       REVERSE_GEOCODER_ENABLED: "false"
       PORT: "8000"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:${HOST_PORT:-18010}:8000"
     volumes:
       - uploads_data:/app/data/uploads
     depends_on:

@@ -16,6 +16,8 @@ class GeneratedLetter(BaseModel):
     source_type: str | None = None
     beauty_score: int | None = None
     readability_score: int | None = None
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class GenerateResponse(BaseModel):
@@ -69,6 +71,8 @@ class WordImageLetter(BaseModel):
     public_url: str
     place_id: str | None = None
     location: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class GenerateWordResponse(BaseModel):

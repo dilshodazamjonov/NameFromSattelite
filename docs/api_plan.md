@@ -147,6 +147,7 @@ Behavior:
 - allow repeated letters to select independently
 - return `status = "complete"` if every letter has an image
 - return `status = "incomplete"` and `missing_letters` if any requested letter is missing
+- include `latitude` and `longitude` when the selected image has linked place coordinates
 
 Example complete response:
 
@@ -160,7 +161,9 @@ Example complete response:
       "image_id": "upload_a1",
       "public_url": "/static/letters/A/upload_a1.png",
       "place_id": "place_1",
-      "location": "Pakhtakor Central Stadium"
+      "location": "41.3164778, 69.2989028",
+      "latitude": 41.3164778,
+      "longitude": 69.2989028
     }
   ],
   "missing_letters": [],
@@ -180,7 +183,9 @@ Example incomplete response:
       "image_id": "upload_a1",
       "public_url": "/static/letters/A/upload_a1.png",
       "place_id": null,
-      "location": null
+      "location": null,
+      "latitude": null,
+      "longitude": null
     }
   ],
   "missing_letters": ["Z"],

@@ -86,6 +86,7 @@ def health() -> JSONResponse:
 
     health_key = f"_health/{uuid.uuid4().hex}.txt"
     try:
+        
         storage = get_storage()
         stored = storage.save_file(
             file_bytes=b"ok",
@@ -275,6 +276,8 @@ def generate(request: GenerateRequest, db: Session = Depends(get_db)) -> Generat
             patch_id=item["image_id"],
             image_url=item["public_url"],
             source_type="manual_satellite",
+            latitude=item.get("latitude"),
+            longitude=item.get("longitude"),
         )
         for item in result["letters"]
     ]

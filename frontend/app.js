@@ -249,12 +249,32 @@ function renderGeneratedWord(payload) {
       image.src = toDisplayUrl(item.public_url);
       image.alt = `Saved satellite letter ${item.letter}`;
 
-      tile.append(label, image);
+      const mapUrl = googleMapsUrl(item.latitude, item.longitude);
+      if (mapUrl) {
+        const imageLink = document.createElement("a");
+        imageLink.className = "image-map-link";
+        imageLink.href = mapUrl;
+        imageLink.target = "_blank";
+        imageLink.rel = "noopener noreferrer";
+        imageLink.append(image);
+        tile.append(label, imageLink);
+      } else {
+        tile.append(label, image);
+      }
       if (item.location) {
         const location = document.createElement("span");
         location.className = "tile-location";
         location.textContent = item.location;
         tile.append(location);
+      }
+      if (mapUrl) {
+        const mapLink = document.createElement("a");
+        mapLink.className = "map-link";
+        mapLink.href = mapUrl;
+        mapLink.target = "_blank";
+        mapLink.rel = "noopener noreferrer";
+        mapLink.textContent = "Open map";
+        tile.append(mapLink);
       }
       return tile;
     })
@@ -340,6 +360,18 @@ function toDisplayUrl(publicUrl) {
     return publicUrl;
   }
   return `${API_BASE_URL}${publicUrl}`;
+}
+
+function googleMapsUrl(latitude, longitude) {
+  const lat = Number(latitude);
+  const lon = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return null;
+  }
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    return null;
+  }
+  return `https://www.google.com/maps?q=${lat},${lon}`;
 }
 
 function optionElement(value, label) {
